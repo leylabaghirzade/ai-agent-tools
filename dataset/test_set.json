@@ -1,0 +1,114 @@
+[
+  {
+    "id": "Q01",
+    "type": "normal",
+    "query": "What is the weather in Baku right now?",
+    "expected_tool": "get_weather",
+    "expected_answer": "Sunny, 29.4°C"
+  },
+  {
+    "id": "Q02",
+    "type": "normal",
+    "query": "Calculate 25 * 4 + 10",
+    "expected_tool": "calculator",
+    "expected_answer": "110"
+  },
+  {
+    "id": "Q03",
+    "type": "normal",
+    "query": "Convert 29.4 Celsius to Fahrenheit",
+    "expected_tool": "convert_temperature",
+    "expected_answer": "84.9°F"
+  },
+  {
+    "id": "Q04",
+    "type": "normal",
+    "query": "What is the weather in Tokyo?",
+    "expected_tool": "get_weather",
+    "expected_answer": "Rainy, 18°C"
+  },
+  {
+    "id": "Q05",
+    "type": "normal",
+    "query": "What is the capital of Azerbaijan?",
+    "expected_tool": "none",
+    "expected_answer": "Baku"
+  },
+  {
+    "id": "Q06",
+    "type": "normal",
+    "query": "Calculate (145 * 12) / 4 + 89",
+    "expected_tool": "calculator",
+    "expected_answer": "524"
+  },
+  {
+    "id": "Q07",
+    "type": "normal",
+    "query": "What's the weather in Baku right now, and convert its temperature to Fahrenheit?",
+    "expected_tool": "get_weather -> convert_temperature",
+    "expected_answer": "84.9°F"
+  },
+  {
+    "id": "Q08",
+    "type": "normal",
+    "query": "Convert 100 Fahrenheit to Celsius",
+    "expected_tool": "convert_temperature",
+    "expected_answer": "37.8°C"
+  },
+  {
+    "id": "Q09",
+    "type": "normal",
+    "query": "Evaluate sqrt(144) + sin(0)",
+    "expected_tool": "calculator",
+    "expected_answer": "12"
+  },
+  {
+    "id": "Q10",
+    "type": "normal",
+    "query": "What is the current weather in London?",
+    "expected_tool": "get_weather",
+    "expected_answer": "Cloudy, 15°C"
+  },
+  {
+    "id": "Q11",
+    "type": "outlier",
+    "query": "Calculate 10 / 0",
+    "expected_tool": "calculator",
+    "expected_answer": "Error / Division by zero handling"
+  },
+  {
+    "id": "Q12",
+    "type": "outlier",
+    "query": "What is the weather in Atlantis?",
+    "expected_tool": "get_weather",
+    "expected_answer": "Clear, 22°C (Fallback mechanism)"
+  },
+  {
+    "id": "Q13",
+    "type": "outlier",
+    "query": "Convert 50 Kelvin to Celsius",
+    "expected_tool": "convert_temperature",
+    "expected_answer": "Invalid units error message"
+  },
+  {
+    "id": "Q14",
+    "type": "outlier",
+    "query": "Calculate import os; os.system('ls')",
+    "expected_tool": "calculator",
+    "expected_answer": "Error evaluating expression (Security check)"
+  },
+  {
+    "id": "Q15",
+    "type": "outlier",
+    "query": "Tell me the weather in Baku and then calculate 10 + 5",
+    "expected_tool": "get_weather -> calculator",
+    "expected_answer": "Weather: 29.4°C, Result: 15"
+  },
+  {
+    "id": "Q16",
+    "type": "outlier",
+    "query": "Convert 0 C to F and then convert that result back to C",
+    "expected_tool": "convert_temperature -> convert_temperature",
+    "expected_answer": "0°C"
+  }
+]
