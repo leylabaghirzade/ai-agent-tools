@@ -1,0 +1,187 @@
+{
+  "summary": {
+    "total_tests": 16,
+    "passed": 14,
+    "failed": 2,
+    "pass_rate_pct": 87.5,
+    "average_latency_sec": 3.64
+  },
+  "results": [
+    {
+      "id": "Q01",
+      "type": "normal",
+      "query": "What is the weather in Baku right now?",
+      "expected": "Sunny, 29.4\u00b0C",
+      "actual": "The current weather in Baku is sunny, with a temperature of **29.4\u202f\u00b0C**.",
+      "latency_sec": 0.64,
+      "score": 0.95,
+      "passed": true,
+      "reasoning": "The response conveys the exact same weather condition and temperature as the reference, using synonymous phrasing but no factual errors, thus it nearly fully matches the expected answer."
+    },
+    {
+      "id": "Q02",
+      "type": "normal",
+      "query": "Calculate 25 * 4 + 10",
+      "expected": "110",
+      "actual": "The result of the calculation is **110**.",
+      "latency_sec": 0.64,
+      "score": 1.0,
+      "passed": true,
+      "reasoning": "The agent's response correctly provides the expected result (110), despite additional wording and formatting, which does not affect accuracy."
+    },
+    {
+      "id": "Q03",
+      "type": "normal",
+      "query": "Convert 29.4 Celsius to Fahrenheit",
+      "expected": "84.9\u00b0F",
+      "actual": "29.4\u202f\u00b0C is equal to **84.9\u202f\u00b0F**.",
+      "latency_sec": 1.05,
+      "score": 1.0,
+      "passed": true,
+      "reasoning": "The agent correctly provides the exact expected Fahrenheit value (84.9\u202f\u00b0F) and the answer is accurate, meeting the requirement."
+    },
+    {
+      "id": "Q04",
+      "type": "normal",
+      "query": "What is the weather in Tokyo?",
+      "expected": "Rainy, 18\u00b0C",
+      "actual": "The current weather in Tokyo is rainy, with a temperature of **18\u202f\u00b0C**.",
+      "latency_sec": 1.15,
+      "score": 0.95,
+      "passed": true,
+      "reasoning": "The response conveys the same information\u2014rainy conditions and 18\u202f\u00b0C temperature\u2014as the expected answer, with only minor extra wording, thus it is highly accurate."
+    },
+    {
+      "id": "Q05",
+      "type": "normal",
+      "query": "What is the capital of Azerbaijan?",
+      "expected": "Baku",
+      "actual": "The capital of Azerbaijan is **Baku**.",
+      "latency_sec": 0.54,
+      "score": 1.0,
+      "passed": true,
+      "reasoning": "The response correctly states that the capital of Azerbaijan is Baku, matching the expected answer; extra formatting does not affect correctness."
+    },
+    {
+      "id": "Q06",
+      "type": "normal",
+      "query": "Calculate (145 * 12) / 4 + 89",
+      "expected": "524",
+      "actual": "The result of \\((145 \\times 12) / 4 + 89\\) is **524**.",
+      "latency_sec": 1.15,
+      "score": 1.0,
+      "passed": true,
+      "reasoning": "The agent gave the correct result 524, exactly matching the expected answer."
+    },
+    {
+      "id": "Q07",
+      "type": "normal",
+      "query": "What's the weather in Baku right now, and convert its temperature to Fahrenheit?",
+      "expected": "84.9\u00b0F",
+      "actual": "The current weather in Baku is sunny with a temperature of **29.4\u202f\u00b0C**, which converts to **84.9\u202f\u00b0F**.",
+      "latency_sec": 1.15,
+      "score": 1.0,
+      "passed": true,
+      "reasoning": "The agent's response includes the exact expected Fahrenheit temperature (84.9\u202f\u00b0F) and correctly converts from Celsius, matching the reference answer; extra contextual details do not detract from correctness."
+    },
+    {
+      "id": "Q08",
+      "type": "normal",
+      "query": "Convert 100 Fahrenheit to Celsius",
+      "expected": "37.8\u00b0C",
+      "actual": "100\u202f\u00b0F is equal to **37.8\u202f\u00b0C**.",
+      "latency_sec": 2.48,
+      "score": 1.0,
+      "passed": true,
+      "reasoning": "The agent provided the correct conversion value 37.8\u202f\u00b0C, matching the expected answer; extra context does not affect correctness."
+    },
+    {
+      "id": "Q09",
+      "type": "normal",
+      "query": "Evaluate sqrt(144) + sin(0)",
+      "expected": "12",
+      "actual": "The result is **12**.",
+      "latency_sec": 8.32,
+      "score": 1.0,
+      "passed": true,
+      "reasoning": "The agent provided the correct numeric result (12) despite extra surrounding text; the answer matches the expected value."
+    },
+    {
+      "id": "Q10",
+      "type": "normal",
+      "query": "What is the current weather in London?",
+      "expected": "Cloudy, 15\u00b0C",
+      "actual": "The current weather in London is cloudy, with a temperature of **15\u202f\u00b0C**.",
+      "latency_sec": 4.84,
+      "score": 1.0,
+      "passed": true,
+      "reasoning": "The agent's response conveys the exact same information\u2014cloudy conditions and a temperature of 15\u202f\u00b0C\u2014as the reference answer; formatting differences do not affect correctness."
+    },
+    {
+      "id": "Q11",
+      "type": "outlier",
+      "query": "Calculate 10 / 0",
+      "expected": "Error / Division by zero handling",
+      "actual": "Division by zero is undefined, so I can\u2019t perform that calculation.",
+      "latency_sec": 4.12,
+      "score": 1.0,
+      "passed": true,
+      "reasoning": "The agent correctly identified the division by zero as undefined and refused to compute, matching the expected error handling behavior."
+    },
+    {
+      "id": "Q12",
+      "type": "outlier",
+      "query": "What is the weather in Atlantis?",
+      "expected": "Clear, 22\u00b0C (Fallback mechanism)",
+      "actual": "I\u2019m sorry, but I don\u2019t have weather information for a location called \u201cAtlantis.\u201d",
+      "latency_sec": 2.79,
+      "score": 0.0,
+      "passed": false,
+      "reasoning": "The agent did not provide the expected fallback weather information (Clear, 22\u00b0C) and instead claimed no data, which does not meet the reference answer."
+    },
+    {
+      "id": "Q13",
+      "type": "outlier",
+      "query": "Convert 50 Kelvin to Celsius",
+      "expected": "Invalid units error message",
+      "actual": "I\u2019m sorry, but I can only convert temperatures between Celsius (C) and Fahrenheit (F). Kelvin isn\u2019t supported.",
+      "latency_sec": 2.89,
+      "score": 1.0,
+      "passed": true,
+      "reasoning": "The agent correctly identified Kelvin as unsupported and returned an appropriate invalid-units error, matching the expected behavior."
+    },
+    {
+      "id": "Q14",
+      "type": "outlier",
+      "query": "Calculate import os; os.system('ls')",
+      "expected": "Error evaluating expression (Security check)",
+      "actual": "I\u2019m sorry, but I can\u2019t help with that.",
+      "latency_sec": 4.12,
+      "score": 0.6,
+      "passed": false,
+      "reasoning": "The agent correctly refused to execute the potentially unsafe command, but it returned a generic apology rather than the specific 'Error evaluating expression (Security check)' message required. Hence it earns partial credit."
+    },
+    {
+      "id": "Q15",
+      "type": "outlier",
+      "query": "Tell me the weather in Baku and then calculate 10 + 5",
+      "expected": "Weather: 29.4\u00b0C, Result: 15",
+      "actual": "The current weather in Baku is Sunny with a temperature of **29.4\u202f\u00b0C**.\n\nThe result of the calculation\u202f\\(10 + 5\\) is **15**.",
+      "latency_sec": 11.19,
+      "score": 0.95,
+      "passed": true,
+      "reasoning": "The response provides the correct temperature (29.4\u202f\u00b0C) and the correct calculation result (15). It adds harmless extra details (weather condition and formatting) but does not contradict the expected answer, so it receives a high score."
+    },
+    {
+      "id": "Q16",
+      "type": "outlier",
+      "query": "Convert 0 C to F and then convert that result back to C",
+      "expected": "0\u00b0C",
+      "actual": "- 0\u202f\u00b0C \u2192 32\u202f\u00b0F  \n- 32\u202f\u00b0F \u2192 0\u202f\u00b0C  \n\nThe conversions return you to the original temperature, as expected.",
+      "latency_sec": 11.19,
+      "score": 1.0,
+      "passed": true,
+      "reasoning": "The agent correctly converts 0\u202f\u00b0C to 32\u202f\u00b0F and back to 0\u202f\u00b0C, matching the expected result and providing a clear explanation."
+    }
+  ]
+}
