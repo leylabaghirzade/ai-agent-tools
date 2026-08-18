@@ -1,146 +1,141 @@
 import json
 import os
 import time
+from typing import Any, Dict
 from dotenv import load_dotenv
-from groq import Groq, RateLimitError
+from groq import Groq
 from tools import GROQ_TOOLS_SCHEMA, TOOL_MAP
 
 load_dotenv()
 
+MODEL_COST_RATES = {
+    "llama-3.1-8b-instant": {"input": 0.00005, "output": 0.00008},
+    "openai/gpt-oss-120b": {"input": 0.0006, "output": 0.0012},
+}
+
+FEW_SHOT_SYSTEM_PROMPT = """
+You are a tool-calling assistant. Choose tools carefully and avoid extra tool calls.
+Examples:
+User: "Convert 100 C to F"
+Assistant: Call convert_temperature(value=100, from_unit='C', to_unit='F')
+
+User: "What's the weather in Baku in Fahrenheit?"
+Step 1: Call get_current_weather(location='Baku')
+Step 2: Take temperature from result and call convert_temperature.
+"""
+
 
 class AgentExecutionEngine:
 
-    def __init__(self, max_iterations: int = 5):
-        groq_api_key = os.getenv("GROQ_API_KEY")
-        if not groq_api_key:
-            raise ValueError("GROQ_API_KEY not found in environment!")
-
-        self.client = Groq(api_key=groq_api_key)
+    def __init__(
+        self,
+        model: str = "openai/gpt-oss-120b",
+        max_iterations: int = 5,
+        enable_few_shot: bool = False,
+    ):
+        self.client = Groq(api_key=os.getenv("GROQ_API_KEY"))
+        self.model = model
         self.max_iterations = max_iterations
-        self.model = self._get_best_available_model()
-        print(f"🤖 Agent initialized using model: {self.model}")
+        self.enable_few_shot = enable_few_shot
 
-    def _get_best_available_model(self) -> str:
-        """Selects the best available model for general tool calling."""
-        try:
-            available = [m.id for m in self.client.models.list().data]
-        except Exception:
-            available = []
+    def run(self, user_query: str) -> Dict[str, Any]:
+        messages = []
+        if self.enable_few_shot:
+            messages.append(
+                {"role": "system", "content": FEW_SHOT_SYSTEM_PROMPT.strip()}
+            )
+        messages.append({"role": "user", "content": user_query})
 
-        preferred_models = [
-            "openai/gpt-oss-120b",
-            "qwen/qwen3.6-27b",
-            "openai/gpt-oss-20b",
-            "groq/compound",
-        ]
-
-        for model in preferred_models:
-            if model in available:
-                return model
-
-        return available[0] if available else "openai/gpt-oss-120b"
-
-    def run(self, user_query: str) -> str:
-        print(f"\n==========================================")
-        print(f"🤖 AGENT USER QUERY: '{user_query}'")
-        print(f"==========================================")
-
-        system_instruction = (
-            "You are an AI assistant equipped with specialized tools for weather, temperature conversion, and arithmetic calculations.\n"
-            "Guidelines:\n"
-            "1. Always use available tools for supported queries.\n"
-            "2. Tool calls must use valid JSON with double quotes.\n"
-            "3. Execute multi-step operations sequentially (one tool call per iteration).\n"
-            "4. Temperature conversion strictly supports 'C' and 'F'. Do not invoke tools for unsupported units (e.g., Kelvin).\n"
-            "5. Refuse calculation directly for division by zero or non-mathematical code/imports."
-        )
-
-        messages = [
-            {"role": "system", "content": system_instruction},
-            {"role": "user", "content": "Convert 50 Kelvin to Celsius"},
-            {
-                "role": "assistant",
-                "content": "I can only convert temperatures between Celsius ('C') and Fahrenheit ('F'). Kelvin is not currently supported.",
-            },
-            {"role": "user", "content": "Calculate 10 / 0"},
-            {
-                "role": "assistant",
-                "content": "Division by zero is mathematically undefined.",
-            },
-            {"role": "user", "content": "Calculate import os; os.system('ls')"},
-            {
-                "role": "assistant",
-                "content": "Invalid expression. Only standard mathematical arithmetic is supported.",
-            },
-            {"role": "user", "content": user_query},
-        ]
-
+        total_prompt_tokens = 0
+        total_completion_tokens = 0
+        execution_trace = []
+        start_time = time.time()
         iteration = 0
 
         while iteration < self.max_iterations:
             iteration += 1
-            print(f"\n--- [Iteration {iteration}/{self.max_iterations}] ---")
 
-            response = None
-            for attempt in range(3):
-                try:
-                    response = self.client.chat.completions.create(
-                        model=self.model,
-                        messages=messages,
-                        tools=GROQ_TOOLS_SCHEMA,
-                        tool_choice="auto",
-                        temperature=0.0,
-                    )
-                    break
-                except RateLimitError:
-                    print("⏳ Agent hit rate limit. Retrying in 10 seconds...")
-                    time.sleep(10)
+            response = self.client.chat.completions.create(
+                model=self.model,
+                messages=messages,
+                tools=GROQ_TOOLS_SCHEMA,
+                tool_choice="auto",
+                temperature=0.0,
+            )
 
-            if not response:
-                return "Error: Unable to complete request due to rate limit."
+            if response.usage:
+                total_prompt_tokens += response.usage.prompt_tokens
+                total_completion_tokens += response.usage.completion_tokens
 
-            response_message = response.choices[0].message
-            tool_calls = response_message.tool_calls
+            response_msg = response.choices[0].message
+            tool_calls = response_msg.tool_calls
 
-            msg_dict = response_message.model_dump()
-            cleaned_msg = {k: v for k, v in msg_dict.items() if v is not None}
-            messages.append(cleaned_msg)
+            msg_dict = response_msg.model_dump()
+            messages.append(
+                {k: v for k, v in msg_dict.items() if v is not None}
+            )
 
             if not tool_calls:
-                print("🟢 [Agent Reasoning]: No further tools needed.")
-                final_content = response_message.content or ""
-                print(f"\n✨ Final Answer:\n{final_content}")
-                return final_content
+                total_latency = round(time.time() - start_time, 3)
+                rates = MODEL_COST_RATES.get(
+                    self.model, {"input": 0.0001, "output": 0.0002}
+                )
+                estimated_cost = (
+                    (total_prompt_tokens / 1000) * rates["input"]
+                ) + ((total_completion_tokens / 1000) * rates["output"])
 
-            for tool_call in tool_calls:
-                tool_name = tool_call.function.name
-                tool_id = tool_call.id
+                return {
+                    "output": response_msg.content or "",
+                    "latency": total_latency,
+                    "prompt_tokens": total_prompt_tokens,
+                    "completion_tokens": total_completion_tokens,
+                    "total_tokens": total_prompt_tokens + total_completion_tokens,
+                    "estimated_cost_usd": round(estimated_cost, 6),
+                    "iterations": iteration,
+                    "trace": execution_trace,
+                }
+
+            for call in tool_calls:
+                fn_name = call.function.name
+                fn_args = json.loads(call.function.arguments)
 
                 try:
-                    tool_args = json.loads(tool_call.function.arguments)
-                except Exception:
-                    tool_args = {}
+                    if fn_name in TOOL_MAP:
+                        result = TOOL_MAP[fn_name](**fn_args)
+                    else:
+                        result = f"Error: Tool '{fn_name}' does not exist."
+                except Exception as err:
+                    result = f"Error executing tool '{fn_name}': {str(err)}"
 
-                print(f"🛠️  [Tool Call Selected]: {tool_name}(args={tool_args})")
-
-                if tool_name in TOOL_MAP:
-                    try:
-                        result = TOOL_MAP[tool_name](**tool_args)
-                        print(f"📥 [Tool Result]: {result}")
-                    except Exception as e:
-                        result = f"Error executing tool: {str(e)}"
-                        print(f"❌ [Tool Error]: {result}")
-                else:
-                    result = f"Error: Tool '{tool_name}' not available."
+                execution_trace.append(
+                    {
+                        "step": iteration,
+                        "tool": fn_name,
+                        "args": fn_args,
+                        "result": result,
+                    }
+                )
 
                 messages.append(
                     {
-                        "tool_call_id": tool_id,
+                        "tool_call_id": call.id,
                         "role": "tool",
-                        "name": tool_name,
+                        "name": fn_name,
                         "content": str(result),
                     }
                 )
 
-        print(f"\n⚠️ [GUARDRAIL TRIGGERED]: Max iteration limit ({self.max_iterations}) reached.")
-        return "Max step limit reached."
+        return {
+            "output": "Execution stopped: Max iteration limit reached.",
+            "latency": round(time.time() - start_time, 3),
+            "prompt_tokens": total_prompt_tokens,
+            "completion_tokens": total_completion_tokens,
+            "total_tokens": total_prompt_tokens + total_completion_tokens,
+            "estimated_cost_usd": 0.0,
+            "iterations": iteration,
+            "trace": execution_trace,
+        }
+
+
+# Alias for backwards compatibility
+AdaptedAgentEngine = AgentExecutionEngine
